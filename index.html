@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco Networking Academy - Quiz Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cisco: {
+                            dark: '#051026',
+                            header: '#000000',
+                            blue: '#005073',
+                            accent: '#00bceb',
+                            hover: '#00709e',
+                            bg: '#f4f6f8',
+                            card: '#ffffff',
+                            border: '#e2e8f0',
+                            text: '#2d3748',
+                            muted: '#718096',
+                            success: '#2e7d32',
+                            error: '#d32f2f'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Custom Checkbox & Radio Styles */
+        .cisco-checkbox, .cisco-radio {
+            accent-color: #005073;
+            width: 1.15rem;
+            height: 1.15rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-cisco-bg font-sans text-cisco-text antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER OFICIAL CISCO NETACAD -->
+    <header class="bg-cisco-header text-white shadow-md sticky top-0 z-50">
+        <!-- Top Utility Bar -->
+        <div class="bg-cisco-dark px-4 py-1.5 text-xs text-gray-300 flex justify-between items-center border-b border-gray-800">
+            <div class="flex items-center space-x-3">
+                <span class="font-semibold tracking-wider text-cisco-accent flex items-center gap-1.5">
+                    <i class="fa-solid fa-network-wired text-sm"></i> CISCO NETWORKING ACADEMY
+                </span>
+                <span class="text-gray-600">|</span>
+                <span class="text-gray-300 hidden md:inline">Linux Essentials - Capítulos 10 a 18</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="timer-display" class="font-mono bg-gray-900 px-2.5 py-0.5 rounded text-cisco-accent border border-gray-700">
+                    <i class="fa-regular fa-clock mr-1"></i>00:00:00
+                </span>
+                <button onclick="resetExam()" class="hover:text-cisco-accent transition flex items-center gap-1 text-xs text-gray-300">
+                    <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Header / Dashboard Bar -->
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-cisco-blue text-white p-2 rounded-lg font-bold text-lg leading-none flex items-center justify-center">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base md:text-lg leading-tight text-white">Evaluación Final de Módulos 10 - 18</h1>
+                        <p class="text-xs text-gray-400">Banco Completo de 90 Preguntas</p>
+                    </div>
+                </div>
+                
+                <!-- Toggle Mobile Sidebar -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Score Stats Bar -->
+            <div class="flex items-center space-x-2 md:space-x-6 bg-gray-900/80 px-4 py-2 rounded-lg border border-gray-800 w-full md:w-auto justify-around">
+                <div class="text-center px-2">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider">Correctas</div>
+                    <div id="stat-correct" class="text-lg font-bold text-green-400">0</div>
+                </div>
+                <div class="h-8 w-px bg-gray-800"></div>
+                <div class="text-center px-2">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider">Incorrectas</div>
+                    <div id="stat-incorrect" class="text-lg font-bold text-red-400">0</div>
+                </div>
+                <div class="h-8 w-px bg-gray-800"></div>
+                <div class="text-center px-2">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider">Respondidas</div>
+                    <div id="stat-answered" class="text-lg font-bold text-cisco-accent">0 / 90</div>
+                </div>
+                <div class="h-8 w-px bg-gray-800"></div>
+                <div class="text-center px-2">
+                    <div class="text-xs text-gray-400 uppercase tracking-wider">Puntaje</div>
+                    <div id="stat-score" class="text-lg font-bold text-yellow-400">0%</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow flex flex-col md:flex-row gap-6 w-full">
+
+        <!-- BARRA LATERAL - NAVEGACIÓN DE PREGUNTAS (Estilo Cisco NetAcad) -->
+        <aside id="sidebar" class="w-full md:w-80 bg-white rounded-lg border border-cisco-border shadow-sm flex flex-col h-auto md:h-[calc(100vh-140px)] md:sticky md:top-24 hidden md:flex transition-all">
+            <!-- Filter & Module Select Header -->
+            <div class="p-3 border-b border-cisco-border bg-gray-50 rounded-t-lg">
+                <label for="module-select" class="block text-xs font-semibold text-gray-600 mb-1">FILTRAR POR MÓDULO:</label>
+                <select id="module-select" onchange="filterByModule(this.value)" class="w-full text-xs bg-white border border-gray-300 rounded p-2 focus:ring-2 focus:ring-cisco-blue focus:outline-none">
+                    <option value="all">Todos los Capítulos (90 Preguntas)</option>
+                    <option value="10">Examen 10: Redirección e I/O</option>
+                    <option value="11">Examen 11: Scripting y Shell</option>
+                    <option value="12">Examen 12: Arquitectura de Hardware</option>
+                    <option value="13">Examen 13: Kernel y Procesos</option>
+                    <option value="14">Examen 14: Configuración de Red</option>
+                    <option value="15">Examen 15: Usuarios y Seguridad</option>
+                    <option value="16">Examen 16: Gestión de Usuarios</option>
+                    <option value="17">Examen 17: Permisos de Archivos</option>
+                    <option value="18">Examen 18: Permisos Especiales y Links</option>
+                </select>
+            </div>
+
+            <!-- Leyenda de Estado -->
+            <div class="px-3 py-2 bg-gray-100 text-[11px] text-gray-600 flex justify-between border-b border-cisco-border">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block"></span> Pendiente</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Correcta</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Incorrecta</span>
+            </div>
+
+            <!-- Grid de Botones de Preguntas -->
+            <div id="questions-grid" class="p-3 overflow-y-auto grid grid-cols-5 gap-2 flex-grow max-h-[350px] md:max-h-none">
+                <!-- Se llena dinámicamente -->
+            </div>
+
+            <!-- Progress Bar Bottom -->
+            <div class="p-3 border-t border-cisco-border bg-gray-50 rounded-b-lg">
+                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>Progresión total</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div id="progress-bar-fill" class="bg-cisco-blue h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ÁREA PRINCIPAL DE PREGUNTAS (Tarjetas estilo Cisco NetAcad) -->
+        <section class="flex-1 flex flex-col">
+            <div class="bg-white rounded-lg border border-cisco-border shadow-sm p-5 md:p-8 flex-grow flex flex-col justify-between">
+                
+                <div>
+                    <!-- Header de la Pregunta -->
+                    <div class="flex justify-between items-start border-b border-gray-200 pb-4 mb-5">
+                        <div>
+                            <span id="question-chapter-badge" class="inline-block bg-cisco-blue text-white text-xs font-semibold px-2.5 py-1 rounded mb-2">
+                                Capítulo 10
+                            </span>
+                            <h2 id="question-number-title" class="text-lg md:text-xl font-bold text-cisco-dark">
+                                Pregunta 1 de 90
+                            </h2>
+                        </div>
+                        <span id="question-type-badge" class="text-xs font-medium px-2.5 py-1 rounded bg-blue-50 text-cisco-blue border border-blue-200">
+                            Opción Única
+                        </span>
+                    </div>
+
+                    <!-- Enunciado de la Pregunta -->
+                    <div id="question-text" class="text-base text-gray-800 font-medium leading-relaxed mb-6">
+                        <!-- El texto de la pregunta se insertará aquí -->
+                    </div>
+
+                    <!-- Mensaje / Requisito especial (e.g. Choose Two) -->
+                    <div id="question-instruction" class="hidden mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-amber-600"></i>
+                        <span id="instruction-text">Seleccione las opciones correspondientes.</span>
+                    </div>
+
+                    <!-- Opciones de Respuesta -->
+                    <div id="options-container" class="space-y-3 mb-6">
+                        <!-- Las opciones (radio/checkbox) se cargarán dinámicamente -->
+                    </div>
+
+                    <!-- Feedback Box (Aparece tras hacer "Check") -->
+                    <div id="feedback-box" class="hidden p-4 rounded-lg border mb-6 transition-all">
+                        <div class="flex items-center gap-2 font-bold mb-1" id="feedback-header">
+                            <!-- Icon and Status -->
+                        </div>
+                        <div id="feedback-body" class="text-sm space-y-2">
+                            <!-- Detalles del resultado -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer de Navegación / Botones de Acción Estilo NetAcad -->
+                <div class="pt-6 border-t border-cisco-border flex flex-wrap justify-between items-center gap-3">
+                    <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left"></i> Anterior
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <button id="btn-check" onclick="checkAnswer()" class="px-5 py-2 text-sm font-bold text-white bg-cisco-blue hover:bg-cisco-hover rounded-md shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> Comprobar Respuesta
+                        </button>
+
+                        <button id="btn-next" onclick="navigateQuestion(1)" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition flex items-center gap-2">
+                            Siguiente <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-cisco-dark text-gray-400 text-xs py-4 px-6 border-t border-gray-800 text-center">
+        <p>Plataforma de Simulación de Exámenes basada en el estándar oficial de Cisco Networking Academy (NetAcad / Skills For All).</p>
+        <p class="mt-1 text-gray-500">Contenido traducido y adaptado para preparación de certificación Linux Essentials.</p>
+    </footer>
+
+    <!-- BANCO DE PREGUNTAS Y LÓGICA DE LA APLICACIÓN -->
+    <script>
+        // Banco completo de 90 preguntas (Capítulos 10 al 18)
+        const quizQuestions = [
+            // EXAMEN 10
+            {
+                id: 1,
+                chapter: 10,
+                type: 'single',
+                text: "A successful command may or may not print output to STDOUT. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 2,
+                chapter: 10,
+                type: 'single',
+                text: "Which of the following commands will direct error messages to the file, error.log?",
+                options: [
+                    "<code>ls /root 2> error.log</code>",
+                    "<code>ls /root > error.log</code>",
+                    "<code>ls /root 1> error.log</code>",
+                    "<code>ls /root &> error.log</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 3,
+                chapter: 10,
+                type: 'single',
+                text: "Which of the following commands will append its output to output.file?",
+                options: [
+                    "<code>echo Testing >> output.file</code>",
+                    "<code>echo Testing > output.file</code>",
+                    "<code>echo Testing 2> output.file</code>",
+                    "<code>echo Testing < output.file</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 4,
+                chapter: 10,
+                type: 'single',
+                text: "Which of the following commands will display only lines that begin with start?",
+                options: [
+                    "<code>grep ^start file.txt</code>",
+                    "<code>grep start$ file.txt</code>",
+                    "<code>grep *start file.txt</code>",
+                    "<code>grep .start file.txt</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 5,
+                chapter: 10,
+                type: 'single',
+                text: "Which of the following commands will display lines that contain either start or end?",
+                options: [
+                    "<code>egrep 'start|end' file.txt</code>",
+                    "<code>grep 'start&end' file.txt</code>",
+                    "<code>grep -E 'start..end' file.txt</code>",
+                    "<code>egrep 'start+end' file.txt</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 6,
+                chapter: 10,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following commands can be used to scroll through a text file? (choose two)",
+                options: ["more", "less", "cat", "tail", "head"],
+                correct: [0, 1]
+            },
+            {
+                id: 7,
+                chapter: 10,
+                type: 'single',
+                text: "Which option for the cut command is used to specify the field?",
+                options: ["<code>-f</code>", "<code>-d</code>", "<code>-c</code>", "<code>-s</code>"],
+                correct: [0]
+            },
+            {
+                id: 8,
+                chapter: 10,
+                type: 'single',
+                text: "Which option for the wc command will print the total number of words in a file?",
+                options: ["<code>-w</code>", "<code>-l</code>", "<code>-c</code>", "<code>-m</code>"],
+                correct: [0]
+            },
+            {
+                id: 9,
+                chapter: 10,
+                type: 'single',
+                text: "Which command can be used to print line numbers?",
+                options: ["<code>nl</code>", "<code>num</code>", "<code>linenum</code>", "<code>count -l</code>"],
+                correct: [0]
+            },
+            {
+                id: 10,
+                chapter: 10,
+                type: 'single',
+                text: "The command <code>echo \"text\" >> file.txt</code> will not overwrite file.txt if it already exists. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+
+            // EXAMEN 11
+            {
+                id: 11,
+                chapter: 11,
+                type: 'single',
+                text: "A file begins with <code>#!/bin/csh</code>. This means:",
+                options: [
+                    "Running the script will invoke /bin/csh to interpret the rest of the file",
+                    "The script is restricted to root execution only",
+                    "The script will be automatically compiled into binary format",
+                    "The system will execute the script using /bin/bash by default"
+                ],
+                correct: [0]
+            },
+            {
+                id: 12,
+                chapter: 11,
+                type: 'single',
+                text: "Given the script part: <code>if [ -f $1 ]; then echo \"I am here\"; fi</code>. What is $1?",
+                options: [
+                    "It is the first argument passed to the script",
+                    "It is the total count of arguments passed",
+                    "It represents the process ID of the script",
+                    "It is the return code of the previous command"
+                ],
+                correct: [0]
+            },
+            {
+                id: 13,
+                chapter: 11,
+                type: 'single',
+                text: "What is the correct way to assign the word \"Hello\" to a variable?",
+                options: [
+                    "<code>A=\"Hello\"</code>",
+                    "<code>A = \"Hello\"</code>",
+                    "<code>set A = \"Hello\"</code>",
+                    "<code>var A = \"Hello\"</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 14,
+                chapter: 11,
+                type: 'single',
+                text: "What is the correct way to save the current directory to a variable?",
+                options: [
+                    "<code>A=$(pwd)</code>",
+                    "<code>A=pwd</code>",
+                    "<code>A=&pwd</code>",
+                    "<code>A=eval(pwd)</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 15,
+                chapter: 11,
+                type: 'single',
+                text: "What information is held inside $??",
+                options: [
+                    "The previous command's exit code",
+                    "The current user's security ID",
+                    "The background job number",
+                    "The path of the currently executing script"
+                ],
+                correct: [0]
+            },
+            {
+                id: 16,
+                chapter: 11,
+                type: 'single',
+                text: "How would you finish your script with an exit code of 42?",
+                options: [
+                    "<code>exit 42</code>",
+                    "<code>return 42</code>",
+                    "<code>stop 42</code>",
+                    "<code>break 42</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 17,
+                chapter: 11,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Given: <code>while [ ! -f /tmp/foo ]; do echo -n \".\"; process_data > /tmp/foo; done</code>. Which are true? (choose two)",
+                options: [
+                    "If a file called /tmp/foo exists, process_data won't be run",
+                    "process_data will be called at most once",
+                    "The loop will execute infinitely regardless of /tmp/foo",
+                    "process_data is executed repeatedly until /tmp/foo is deleted",
+                    "The script will throw a syntax error due to !"
+                ],
+                correct: [0, 1]
+            },
+            {
+                id: 18,
+                chapter: 11,
+                type: 'single',
+                text: "A conditional that lets you make multiple comparisons with a pattern is called:",
+                options: ["case", "if/else", "while", "for"],
+                correct: [0]
+            },
+            {
+                id: 19,
+                chapter: 11,
+                type: 'single',
+                text: "What is the meaning of <code>$((i+1))</code>?",
+                options: [
+                    "1 will be added to the i variable",
+                    "i will be concatenated with string '1'",
+                    "It checks if i is equal to 1",
+                    "It creates a subprocess with index 1"
+                ],
+                correct: [0]
+            },
+            {
+                id: 20,
+                chapter: 11,
+                type: 'single',
+                text: "How would you write a test that says \"if /tmp/foo is a directory or USERS is greater than 5\"?",
+                options: [
+                    "<code>test -d /tmp/foo -o $USERS -gt 5</code>",
+                    "<code>test -f /tmp/foo -a $USERS -ge 5</code>",
+                    "<code>test -e /tmp/foo || $USERS > 5</code>",
+                    "<code>test -dir /tmp/foo -or $USERS -gt 5</code>"
+                ],
+                correct: [0]
+            },
+
+            // EXAMEN 12
+            {
+                id: 21,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following are valid CPU types for Intel-based platforms? (choose two)",
+                options: ["32-bit", "64-bit", "128-bit", "16-bit", "8-bit"],
+                correct: [0, 1]
+            },
+            {
+                id: 22,
+                chapter: 12,
+                type: 'single',
+                text: "64 bit platforms can access more memory than 32 bit platforms. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 23,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following are common busing systems? (choose two)",
+                options: ["USB", "PCI", "RAM", "CPU", "EXT4"],
+                correct: [0, 1]
+            },
+            {
+                id: 24,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following are valid partitioning types? (choose two)",
+                options: ["MBR", "GPT", "NTFS", "SWAP", "EXT3"],
+                correct: [0, 1]
+            },
+            {
+                id: 25,
+                chapter: 12,
+                type: 'single',
+                text: "The fdisk command is a tool used for working with the MBR partitioned disks. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 26,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following commands will display CPU information? (choose two)",
+                options: ["arch", "lscpu", "lsusb", "lspci", "lsblk"],
+                correct: [0, 1]
+            },
+            {
+                id: 27,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 3,
+                text: "What are the advantages of solid state disks when compared to traditional spinning platter hard disks? (choose three)",
+                options: [
+                    "Low power consumption",
+                    "Faster system boot times",
+                    "Less heat",
+                    "Lower cost per gigabyte",
+                    "Infinite read/write write cycles"
+                ],
+                correct: [0, 1, 2]
+            },
+            {
+                id: 28,
+                chapter: 12,
+                type: 'single',
+                text: "Software that allows hardware devices to communicate with the installed operating system is called?",
+                options: ["Drivers", "Compilers", "Kernels", "Services"],
+                correct: [0]
+            },
+            {
+                id: 29,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 3,
+                text: "Which of the following commands will check hard disk MBR partitions? (choose three)",
+                options: ["fdisk", "sfdisk", "cfdisk", "gdisk", "parted-gpt"],
+                correct: [0, 1, 2]
+            },
+            {
+                id: 30,
+                chapter: 12,
+                type: 'multiple',
+                reqCount: 3,
+                text: "Which of the following commands will check hard disk GPT partitions? (choose three)",
+                options: ["gdisk", "cgdisk", "sgdisk", "fdisk-mbr", "mformat"],
+                correct: [0, 1, 2]
+            },
+
+            // EXAMEN 13
+            {
+                id: 31,
+                chapter: 13,
+                type: 'multiple',
+                reqCount: 2,
+                text: "The Linux kernel mounts the following pseudo-filesystems to provide access to information about hardware devices: (choose two)",
+                options: ["/sys", "/proc", "/dev", "/etc", "/mnt"],
+                correct: [0, 1]
+            },
+            {
+                id: 32,
+                chapter: 13,
+                type: 'single',
+                text: "The Process ID (PID) of the init process is:",
+                options: ["1", "0", "100", "-1"],
+                correct: [0]
+            },
+            {
+                id: 33,
+                chapter: 13,
+                type: 'single',
+                text: "The free command outputs statistics about:",
+                options: ["Memory usage", "Disk storage space", "CPU frequency", "Network bandwidth"],
+                correct: [0]
+            },
+            {
+                id: 34,
+                chapter: 13,
+                type: 'single',
+                text: "What directory typically contains log files?",
+                options: ["/var/log", "/etc/log", "/usr/log", "/opt/log"],
+                correct: [0]
+            },
+            {
+                id: 35,
+                chapter: 13,
+                type: 'single',
+                text: "A load average of 1.0 always means the system is fully loaded. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 36,
+                chapter: 13,
+                type: 'single',
+                text: "Which file contains the information passed to the kernel at boot time?",
+                options: ["/proc/cmdline", "/etc/boot.conf", "/var/log/dmesg", "/sys/kernel/debug"],
+                correct: [0]
+            },
+            {
+                id: 37,
+                chapter: 13,
+                type: 'single',
+                text: "The /var directory has files that change over time. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 38,
+                chapter: 13,
+                type: 'single',
+                text: "Information about the init process can be found in the /proc/1 directory. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 39,
+                chapter: 13,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following commands will allow you to view all processes on the system? (choose two)",
+                options: ["ps aux", "ps -ef", "ps --show-all", "procstat", "top -a"],
+                correct: [0, 1]
+            },
+            {
+                id: 40,
+                chapter: 13,
+                type: 'single',
+                text: "The sbin directories are primarily intended to be used by the root user. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+
+            // EXAMEN 14
+            {
+                id: 41,
+                chapter: 14,
+                type: 'single',
+                text: "A service is...",
+                options: [
+                    "...a feature provided by one computer to another.",
+                    "...a hardware component attached to the motherboard.",
+                    "...a shell script running in foreground mode.",
+                    "...a physical cable connecting two switches."
+                ],
+                correct: [0]
+            },
+            {
+                id: 42,
+                chapter: 14,
+                type: 'multiple',
+                reqCount: 2,
+                text: "A network packet contains (choose two)",
+                options: [
+                    "...the IP address of the destination machine.",
+                    "...the IP address of the source machine.",
+                    "...the CPU serial number of the host.",
+                    "...the root user password.",
+                    "...the full /etc/shadow contents."
+                ],
+                correct: [0, 1]
+            },
+            {
+                id: 43,
+                chapter: 14,
+                type: 'single',
+                text: "Only servers have hostnames. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 44,
+                chapter: 14,
+                type: 'single',
+                text: "Which of the following protocols defines how network communication functions?",
+                options: ["TCP/IP", "HTTP", "FTP", "DNS"],
+                correct: [0]
+            },
+            {
+                id: 45,
+                chapter: 14,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following are valid IPv4 addresses? (choose two)",
+                options: [
+                    "192.105.10.10",
+                    "10.33.55.77",
+                    "256.100.0.1",
+                    "192.168.1.300",
+                    "10.257.12.1"
+                ],
+                correct: [0, 1]
+            },
+            {
+                id: 46,
+                chapter: 14,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following commands will display the routing table? (choose two)",
+                options: ["route", "netstat -r", "ipconfig", "ifconfig -r", "traceroute"],
+                correct: [0, 1]
+            },
+            {
+                id: 47,
+                chapter: 14,
+                type: 'single',
+                text: "Which of the following commands will allow you to log into a remote machine?",
+                options: ["ssh", "telnetd", "rlog", "connect"],
+                correct: [0]
+            },
+            {
+                id: 48,
+                chapter: 14,
+                type: 'single',
+                text: "The RSA key fingerprint allows the dig command to connect to remote systems. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 49,
+                chapter: 14,
+                type: 'single',
+                text: "When looking at the primary IPv4 configuration file, if the device was configured to be a DHCP client, then the BOOTPROTO value would be set to none. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 50,
+                chapter: 14,
+                type: 'single',
+                text: "Which of the following files contains the IP addresses of the name servers the system should consult in any attempt to resolve names to IP addresses?",
+                options: ["/etc/resolv.conf", "/etc/hosts", "/etc/network/interfaces", "/etc/nameserver.conf"],
+                correct: [0]
+            },
+
+            // EXAMEN 15
+            {
+                id: 51,
+                chapter: 15,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which files contain user account information? (choose two)",
+                options: ["/etc/passwd", "/etc/shadow", "/etc/users", "/etc/group-info", "/var/users"],
+                correct: [0, 1]
+            },
+            {
+                id: 52,
+                chapter: 15,
+                type: 'single',
+                text: "Which user can view the /etc/shadow file?",
+                options: ["The root user", "Any standard user", "Members of the 'wheel' group only", "All administrative users"],
+                correct: [0]
+            },
+            {
+                id: 53,
+                chapter: 15,
+                type: 'single',
+                text: "A user can belong to...",
+                options: [
+                    "At least 16 groups",
+                    "Only 1 primary group and no secondary groups",
+                    "Up to 5 groups maximum",
+                    "An unlimited number with a strict limit of 2"
+                ],
+                correct: [0]
+            },
+            {
+                id: 54,
+                chapter: 15,
+                type: 'single',
+                text: "The /etc/shadow file contains plain-text passwords. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 55,
+                chapter: 15,
+                type: 'single',
+                text: "What is the default user for the su command?",
+                options: ["The root user", "The current logged-in user", "The daemon user", "The guest user"],
+                correct: [0]
+            },
+            {
+                id: 56,
+                chapter: 15,
+                type: 'single',
+                text: "Which command would allow a user to execute commands as root?",
+                options: ["sudo", "runas", "admin", "execroot"],
+                correct: [0]
+            },
+            {
+                id: 57,
+                chapter: 15,
+                type: 'single',
+                text: "A value of 0 in the \"minimum\" password aging field means the user cannot change their password. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 58,
+                chapter: 15,
+                type: 'single',
+                text: "Sudo privileges allow users to execute commands as another user. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 59,
+                chapter: 15,
+                type: 'single',
+                text: "The /etc/shadow file contains encrypted passwords. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 60,
+                chapter: 15,
+                type: 'single',
+                text: "Which command can be used to view the /var/log/wtmp file entries?",
+                options: ["last", "wtmpview", "loglist", "history"],
+                correct: [0]
+            },
+
+            // EXAMEN 16
+            {
+                id: 61,
+                chapter: 16,
+                type: 'single',
+                text: "UIDs 1-499 are usually reserved for what kind of users?",
+                options: [
+                    "System accounts, such as server processes",
+                    "Standard regular users",
+                    "Remote VPN users",
+                    "Guest temporary accounts"
+                ],
+                correct: [0]
+            },
+            {
+                id: 62,
+                chapter: 16,
+                type: 'single',
+                text: "Which command will add the group extra to the user bob's secondary groups in addition to bob's current secondary groups?",
+                options: [
+                    "<code>usermod -aG extra bob</code>",
+                    "<code>usermod -g extra bob</code>",
+                    "<code>useradd -G extra bob</code>",
+                    "<code>groupmod -a bob extra</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 63,
+                chapter: 16,
+                type: 'single',
+                text: "The groupmod command can be used to change a group GID. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 64,
+                chapter: 16,
+                type: 'single',
+                text: "GIDs under 500 (or 1000) are usually reserved for what kind of groups?",
+                options: [
+                    "System use",
+                    "Regular user groups",
+                    "Network domains",
+                    "Samba file shares"
+                ],
+                correct: [0]
+            },
+            {
+                id: 65,
+                chapter: 16,
+                type: 'single',
+                text: "Which option for the useradd command allows you to use a different login shell than the default?",
+                options: ["<code>-s</code>", "<code>-sh</code>", "<code>-u</code>", "<code>-m</code>"],
+                correct: [0]
+            },
+            {
+                id: 66,
+                chapter: 16,
+                type: 'single',
+                text: "The userdel -r command will...",
+                options: [
+                    "...automatically delete a user and the user's home directory and mail spool and their contents.",
+                    "...remove only the user password from /etc/shadow.",
+                    "...recursive lock all files created by the user.",
+                    "...rename the user account with a prefix 'deleted_'."
+                ],
+                correct: [0]
+            },
+            {
+                id: 67,
+                chapter: 16,
+                type: 'single',
+                text: "The groupmod command can be used to change a group name. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 68,
+                chapter: 16,
+                type: 'single',
+                text: "Which of the following commands can be used to modify a user?",
+                options: ["<code>usermod</code>", "<code>useredit</code>", "<code>chuser</code>", "<code>moduser</code>"],
+                correct: [0]
+            },
+            {
+                id: 69,
+                chapter: 16,
+                type: 'single',
+                text: "Which command allows you to view or change some of the default values used by the useradd command?",
+                options: [
+                    "<code>useradd -D</code>",
+                    "<code>useradd --defaults</code>",
+                    "<code>show useradd</code>",
+                    "<code>cat /etc/useradd.conf</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 70,
+                chapter: 16,
+                type: 'single',
+                text: "Which of the following commands, run as root, will prevent the user jane from logging in?",
+                options: [
+                    "<code>usermod -L jane</code>",
+                    "<code>userdel -l jane</code>",
+                    "<code>passwd -d jane</code>",
+                    "<code>usermod -lock jane</code>"
+                ],
+                correct: [0]
+            },
+
+            // EXAMEN 17
+            {
+                id: 71,
+                chapter: 17,
+                type: 'single',
+                text: "Which of the following commands set the other permissions on a file to r-x?",
+                options: [
+                    "<code>chmod o=rx file</code>",
+                    "<code>chmod u=rx file</code>",
+                    "<code>chmod g=rx file</code>",
+                    "<code>chmod a+rx file</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 72,
+                chapter: 17,
+                type: 'single',
+                text: "The chown command can be used to change the owner and group of a file. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 73,
+                chapter: 17,
+                type: 'single',
+                text: "The user sysadmin will be able to read a file because they own it. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 74,
+                chapter: 17,
+                type: 'multiple',
+                reqCount: 3,
+                text: "The execute permission on a directory allows you to: (choose three)",
+                options: [
+                    "Along with read permission to successfully perform ls -l",
+                    "Along with write permission to successfully create new files",
+                    "Change to that directory or use it as part of a path",
+                    "Delete files owned by root inside the directory without write permission",
+                    "Execute binary files residing in parent directories"
+                ],
+                correct: [0, 1, 2]
+            },
+            {
+                id: 75,
+                chapter: 17,
+                type: 'single',
+                text: "The execute permission on a file allows you to:",
+                options: [
+                    "Run the file as a script",
+                    "Read the binary structure of the file",
+                    "Delete the file from disk",
+                    "Change file ownership"
+                ],
+                correct: [0]
+            },
+            {
+                id: 76,
+                chapter: 17,
+                type: 'single',
+                text: "The chown command can be used to change the user owner on a file by:",
+                options: ["Only root", "The file owner and root", "Any member of the file group", "Sudoers with read access"],
+                correct: [0]
+            },
+            {
+                id: 77,
+                chapter: 17,
+                type: 'single',
+                text: "The chmod command can be used on a file by:",
+                options: ["The file owner and root", "Only root", "Anyone with write access", "Members of root group only"],
+                correct: [0]
+            },
+            {
+                id: 78,
+                chapter: 17,
+                type: 'single',
+                text: "The execute permission is never set on files by default. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 79,
+                chapter: 17,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following chown commands will change the myFile user ownership to the user sam and the group ownership to administrators? (choose two)",
+                options: [
+                    "<code>chown sam:administrators myFile</code>",
+                    "<code>chown sam.administrators myFile</code>",
+                    "<code>chown sam->administrators myFile</code>",
+                    "<code>chown administrators:sam myFile</code>",
+                    "<code>chown sam/administrators myFile</code>"
+                ],
+                correct: [0, 1]
+            },
+            {
+                id: 80,
+                chapter: 17,
+                type: 'single',
+                text: "The chown command permits changing group ownership done by root only. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+
+            // EXAMEN 18
+            {
+                id: 81,
+                chapter: 18,
+                type: 'single',
+                text: "The sticky bit permission...",
+                options: [
+                    "...prevents others from removing files they don't own from a common directory.",
+                    "...allows everyone to edit any file in the directory.",
+                    "...forces files to be saved in read-only mode.",
+                    "...automatically compresses files inside the folder."
+                ],
+                correct: [0]
+            },
+            {
+                id: 82,
+                chapter: 18,
+                type: 'single',
+                text: "The setuid permission...",
+                options: [
+                    "...allows a command to be run as the file owner.",
+                    "...changes the user ID of the current logged user permanently.",
+                    "...prevents standard users from deleting binary files.",
+                    "...encrypts the file using owner keys."
+                ],
+                correct: [0]
+            },
+            {
+                id: 83,
+                chapter: 18,
+                type: 'single',
+                text: "Which of the following commands will set setuid for the /usr/bin/program?",
+                options: [
+                    "<code>chmod 4755 /usr/bin/program</code>",
+                    "<code>chmod 2755 /usr/bin/program</code>",
+                    "<code>chmod 1755 /usr/bin/program</code>",
+                    "<code>chmod 0755 /usr/bin/program</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 84,
+                chapter: 18,
+                type: 'single',
+                text: "Which of the following commands will set setgid on /shared?",
+                options: [
+                    "<code>chmod 2777 /shared</code>",
+                    "<code>chmod 4777 /shared</code>",
+                    "<code>chmod 1777 /shared</code>",
+                    "<code>chmod 0777 /shared</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 85,
+                chapter: 18,
+                type: 'single',
+                text: "Setting setgid on a directory...",
+                options: [
+                    "...will set the group owner of all files created in the directory to the group owner of the directory.",
+                    "...prevents users from creating new subdirectories.",
+                    "...restricts group members from editing existing files.",
+                    "...grants root privileges to all files created within."
+                ],
+                correct: [0]
+            },
+            {
+                id: 86,
+                chapter: 18,
+                type: 'single',
+                text: "A source and a hard link must be part of the same filesystem. (True/False)",
+                options: ["True", "False"],
+                correct: [0]
+            },
+            {
+                id: 87,
+                chapter: 18,
+                type: 'single',
+                text: "A source file and a symbolic link must be part of the same file system. (True/False)",
+                options: ["False", "True"],
+                correct: [0]
+            },
+            {
+                id: 88,
+                chapter: 18,
+                type: 'single',
+                text: "Which of the following commands would create a hard link for link to file?",
+                options: [
+                    "<code>ln file link</code>",
+                    "<code>ln -s file link</code>",
+                    "<code>link -h file link</code>",
+                    "<code>cp --link file link</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 89,
+                chapter: 18,
+                type: 'single',
+                text: "Which of the following commands would create a symbolic link, link to file?",
+                options: [
+                    "<code>ln -s file link</code>",
+                    "<code>ln file link</code>",
+                    "<code>ln -h file link</code>",
+                    "<code>symlink file link</code>"
+                ],
+                correct: [0]
+            },
+            {
+                id: 90,
+                chapter: 18,
+                type: 'multiple',
+                reqCount: 2,
+                text: "Which of the following directories are designed as locations where any user can create a temporary file? (choose two)",
+                options: ["/tmp", "/var/tmp", "/usr/tmp", "/etc/tmp", "/opt/tmp"],
+                correct: [0, 1]
+            }
+        ];
+
+        // Estado Global de la aplicación
+        let currentIndex = 0;
+        let filteredQuestions = [...quizQuestions];
+        let userAnswers = {}; // { questionId: [indices] }
+        let questionStatus = {}; // { questionId: 'correct' | 'incorrect' | 'pending' }
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        // Inicialización al cargar la ventana
+        window.onload = function() {
+            startTimer();
+            renderSidebarGrid();
+            loadQuestion(currentIndex);
+            setupMobileMenu();
+        };
+
+        // Temporizador
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const hrs = Math.floor(timerSeconds / 3600).toString().padStart(2, '0');
+                const mins = Math.floor((timerSeconds % 3600) / 60).toString().padStart(2, '0');
+                const secs = (timerSeconds % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerHTML = `<i class="fa-regular fa-clock mr-1"></i>${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Renderizar Grid Lateral
+        function renderSidebarGrid() {
+            const grid = document.getElementById('questions-grid');
+            grid.innerHTML = '';
+
+            filteredQuestions.forEach((q, idx) => {
+                const qNum = quizQuestions.findIndex(orig => orig.id === q.id) + 1;
+                const status = questionStatus[q.id] || 'pending';
+                
+                let btnClass = "bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200";
+                let iconClass = "";
+
+                if (status === 'correct') {
+                    btnClass = "bg-green-100 border-green-500 text-green-800 font-bold";
+                    iconClass = "<i class='fa-solid fa-check text-[10px] block'></i>";
+                } else if (status === 'incorrect') {
+                    btnClass = "bg-red-100 border-red-500 text-red-800 font-bold";
+                    iconClass = "<i class='fa-solid fa-xmark text-[10px] block'></i>";
+                } else if (userAnswers[q.id] && userAnswers[q.id].length > 0) {
+                    btnClass = "bg-blue-100 border-blue-400 text-cisco-blue font-bold";
+                }
+
+                if (idx === currentIndex) {
+                    btnClass += " ring-2 ring-cisco-accent ring-offset-1";
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `h-9 rounded border flex flex-col items-center justify-center text-xs transition relative ${btnClass}`;
+                btn.onclick = () => {
+                    currentIndex = idx;
+                    loadQuestion(currentIndex);
+                };
+                btn.innerHTML = `<span>${qNum}</span>${iconClass}`;
+                grid.appendChild(btn);
+            });
+
+            updateProgressStats();
+        }
+
+        // Cargar Pregunta Actual
+        function loadQuestion(index) {
+            if (index < 0 || index >= filteredQuestions.length) return;
+            currentIndex = index;
+
+            const q = filteredQuestions[currentIndex];
+            const origIndex = quizQuestions.findIndex(item => item.id === q.id) + 1;
+
+            // Actualizar Badges y Título
+            document.getElementById('question-chapter-badge').innerText = `Capítulo ${q.chapter}`;
+            document.getElementById('question-number-title').innerText = `Pregunta ${origIndex} de ${quizQuestions.length}`;
+            
+            const typeBadge = document.getElementById('question-type-badge');
+            const instructionBox = document.getElementById('question-instruction');
+            const instructionText = document.getElementById('instruction-text');
+
+            if (q.type === 'multiple') {
+                typeBadge.innerText = `Selección Múltiple (${q.reqCount})`;
+                typeBadge.className = "text-xs font-semibold px-2.5 py-1 rounded bg-amber-100 text-amber-800 border border-amber-300";
+                
+                instructionBox.classList.remove('hidden');
+                instructionText.innerText = `Seleccione exactamente ${q.reqCount} opciones antes de comprobar.`;
+            } else {
+                typeBadge.innerText = "Opción Única";
+                typeBadge.className = "text-xs font-medium px-2.5 py-1 rounded bg-blue-50 text-cisco-blue border border-blue-200";
+                instructionBox.classList.add('hidden');
+            }
+
+            // Cargar Enunciado
+            document.getElementById('question-text').innerHTML = q.text;
+
+            // Cargar Opciones
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const currentSavedAnswers = userAnswers[q.id] || [];
+
+            q.options.forEach((opt, optIdx) => {
+                const isChecked = currentSavedAnswers.includes(optIdx);
+                const optId = `opt_${q.id}_${optIdx}`;
+
+                const optWrapper = document.createElement('label');
+                optWrapper.htmlFor = optId;
+                optWrapper.className = `flex items-start p-3.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition select-none ${isChecked ? 'bg-blue-50/60 border-cisco-blue' : ''}`;
+
+                const inputType = q.type === 'multiple' ? 'checkbox' : 'radio';
+                const inputName = `question_${q.id}`;
+
+                optWrapper.innerHTML = `
+                    <div class="flex items-center h-5 mt-0.5">
+                        <input id="${optId}" type="${inputType}" name="${inputName}" value="${optIdx}" 
+                               class="${q.type === 'multiple' ? 'cisco-checkbox' : 'cisco-radio'}" 
+                               ${isChecked ? 'checked' : ''} 
+                               onchange="handleOptionSelect(${q.id}, ${optIdx}, '${q.type}')">
+                    </div>
+                    <div class="ml-3 text-sm text-gray-800 font-normal leading-relaxed flex-1">
+                        ${opt}
+                    </div>
+                `;
+                optionsContainer.appendChild(optWrapper);
+            });
+
+            // Ocultar feedback al cambiar de pregunta
+            const feedbackBox = document.getElementById('feedback-box');
+            if (questionStatus[q.id] && questionStatus[q.id] !== 'pending') {
+                // Si ya fue evaluada, mostrar el resultado guardado
+                showFeedback(q, questionStatus[q.id] === 'correct');
+            } else {
+                feedbackBox.classList.add('hidden');
+            }
+
+            // Habilitar / Deshabilitar botones de navegación
+            document.getElementById('btn-prev').disabled = (currentIndex === 0);
+            document.getElementById('btn-next').disabled = (currentIndex === filteredQuestions.length - 1);
+
+            renderSidebarGrid();
+        }
+
+        // Manejar Selección de Opciones
+        function handleOptionSelect(qId, optIdx, type) {
+            const q = quizQuestions.find(item => item.id === qId);
+            if (!userAnswers[qId]) {
+                userAnswers[qId] = [];
+            }
+
+            if (type === 'single') {
+                userAnswers[qId] = [optIdx];
+            } else { // Multiple choice
+                const indexInArr = userAnswers[qId].indexOf(optIdx);
+                if (indexInArr > -1) {
+                    userAnswers[qId].splice(indexInArr, 1);
+                } else {
+                    userAnswers[qId].push(optIdx);
+                }
+            }
+
+            // Resetear estado evaluado para permitir re-evaluar si cambia la selección
+            questionStatus[qId] = 'pending';
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            // Actualizar estilo visual de la selección
+            loadQuestion(currentIndex);
+        }
+
+        // Validar / Comprobar Respuesta
+        function checkAnswer() {
+            const q = filteredQuestions[currentIndex];
+            const selected = userAnswers[q.id] || [];
+
+            // Validación de cantidad requerida para Opción Múltiple
+            if (q.type === 'multiple') {
+                if (selected.length !== q.reqCount) {
+                    showCustomToast(`Esta pregunta requiere seleccionar EXACTAMENTE ${q.reqCount} opciones. Haz seleccionado ${selected.length}.`);
+                    return;
+                }
+            } else {
+                if (selected.length === 0) {
+                    showCustomToast("Por favor, selecciona una respuesta antes de comprobar.");
+                    return;
+                }
+            }
+
+            // Evaluar corrección
+            // Debe contener exactamente los mismos elementos que la respuesta correcta
+            const isCorrect = q.correct.length === selected.length &&
+                              q.correct.every(val => selected.includes(val));
+
+            questionStatus[q.id] = isCorrect ? 'correct' : 'incorrect';
+
+            showFeedback(q, isCorrect);
+            renderSidebarGrid();
+        }
+
+        // Mostrar Retroalimentación Estilo Cisco NetAcad
+        function showFeedback(q, isCorrect) {
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackHeader = document.getElementById('feedback-header');
+            const feedbackBody = document.getElementById('feedback-body');
+
+            feedbackBox.classList.remove('hidden', 'bg-green-50', 'border-green-200', 'bg-red-50', 'border-red-200');
+
+            if (isCorrect) {
+                feedbackBox.classList.add('bg-green-50', 'border-green-300');
+                feedbackHeader.className = "flex items-center gap-2 font-bold text-green-800 text-base mb-2";
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-green-600 text-lg"></i> ¡Correcto! Tu respuesta es completamente adecuada.`;
+            } else {
+                feedbackBox.classList.add('bg-red-50', 'border-red-300');
+                feedbackHeader.className = "flex items-center gap-2 font-bold text-red-800 text-base mb-2";
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-600 text-lg"></i> Incorrecto. Revisa el desglose de opciones a continuación:`;
+            }
+
+            // Desglose de Respuestas
+            let breakdownHTML = `<div class="space-y-1.5 mt-2">`;
+            q.options.forEach((opt, idx) => {
+                const isSelected = (userAnswers[q.id] || []).includes(idx);
+                const isTargetCorrect = q.correct.includes(idx);
+
+                let badge = "";
+                let textColor = "text-gray-700";
+
+                if (isTargetCorrect) {
+                    badge = `<span class="bg-green-200 text-green-900 font-bold px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-check"></i> Opción Correcta</span>`;
+                    textColor = "text-green-900 font-medium";
+                } else if (isSelected && !isTargetCorrect) {
+                    badge = `<span class="bg-red-200 text-red-900 font-bold px-2 py-0.5 rounded text-xs"><i class="fa-solid fa-xmark"></i> Seleccionada Incorrectamente</span>`;
+                    textColor = "text-red-900 font-medium";
+                }
+
+                if (badge) {
+                    breakdownHTML += `
+                        <div class="flex items-start justify-between gap-2 p-2 rounded bg-white/80 border border-gray-200">
+                            <span class="${textColor} text-xs leading-relaxed">${opt}</span>
+                            <span class="shrink-0">${badge}</span>
+                        </div>
+                    `;
+                }
+            });
+            breakdownHTML += `</div>`;
+
+            feedbackBody.innerHTML = breakdownHTML;
+        }
+
+        // Navegación entre preguntas
+        function navigateQuestion(direction) {
+            const newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < filteredQuestions.length) {
+                currentIndex = newIndex;
+                loadQuestion(currentIndex);
+            }
+        }
+
+        // Filtrar por Módulo / Capítulo
+        function filterByModule(moduleVal) {
+            if (moduleVal === 'all') {
+                filteredQuestions = [...quizQuestions];
+            } else {
+                const chapterNum = parseInt(moduleVal);
+                filteredQuestions = quizQuestions.filter(q => q.chapter === chapterNum);
+            }
+            currentIndex = 0;
+            loadQuestion(currentIndex);
+        }
+
+        // Actualizar Estadísticas
+        function updateProgressStats() {
+            let correctCount = 0;
+            let incorrectCount = 0;
+            let answeredCount = 0;
+
+            quizQuestions.forEach(q => {
+                const status = questionStatus[q.id];
+                if (status === 'correct') {
+                    correctCount++;
+                    answeredCount++;
+                } else if (status === 'incorrect') {
+                    incorrectCount++;
+                    answeredCount++;
+                }
+            });
+
+            const scorePercent = answeredCount > 0 ? Math.round((correctCount / quizQuestions.length) * 100) : 0;
+            const progressPercent = Math.round((answeredCount / quizQuestions.length) * 100);
+
+            document.getElementById('stat-correct').innerText = correctCount;
+            document.getElementById('stat-incorrect').innerText = incorrectCount;
+            document.getElementById('stat-answered').innerText = `${answeredCount} / ${quizQuestions.length}`;
+            document.getElementById('stat-score').innerText = `${scorePercent}%`;
+
+            document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+            document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+        }
+
+        // Reiniciar Examen
+        function resetExam() {
+            if (confirm("¿Estás seguro de que deseas reiniciar todo el examen? Se perderán las respuestas actuales.")) {
+                userAnswers = {};
+                questionStatus = {};
+                currentIndex = 0;
+                startTimer();
+                loadQuestion(currentIndex);
+            }
+        }
+
+        // Mensaje Flotante de Notificación / Toast Custom
+        function showCustomToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-xl z-50 text-sm flex items-center gap-2 border border-amber-500 animate-bounce";
+            toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400 text-lg"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
+        }
+
+        // Menú responsive para móviles
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
